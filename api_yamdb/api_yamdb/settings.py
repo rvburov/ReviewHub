@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'reviews',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +66,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Password validation
 
