@@ -1,10 +1,51 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets
+from rest_framework import viewsets, filters, mixins
 
+from reviews.models import Title, Genre, Category, Review, Title
+from api.serializers import (TitleChangeSerializer,
+                             TitleReadSerializer,
+                             GenreSerializer,
+                             CategorySerializer,
+                             CommentSerializer,
+                             ReviewSerializer)
 from api.permissions import IsAuthorModerAdminOrReadOnly
-from api.serializers import CommentSerializer, ReviewSerializer
-from reviews.models import Review, Title
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    '''Viewset для модели Title'''
+    queryset = Title.objects.all()
+    permission_classes = ()
+    filter_backends = filters.SearchFilter
+    filterset_fields = ('name', 'year', 'category', 'genre',)
+    http_method_names = ['get', 'post', 'patch', 'delete',]
+
+    def get_serializer_class(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            return TitleReadSerializer
+        else:
+            return TitleChangeSerializer
+
+
+class GenreCategoryViewSet(mixins.ListModelMixin,
+                           mixins.CreateModelMixin,
+                           mixins.DestroyModelMixin,
+                           viewsets.GenericViewSet,):
+    permission_classes = ()
+    filter_backends = filters.SearchFilter
+    filterset_fields = ('name',)
+
+
+class GenreViewSet(GenreCategoryViewSet):
+    '''Vieset для модели Genre'''
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+
+
+class CategoryViewSet(GenreCategoryViewSet):
+    '''Viewset для модели Category'''
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
