@@ -1,11 +1,11 @@
 from django.contrib.auth.models import AbstractUser
-from django.core import validators
+from django.core.validators import RegexValidator
 from django.db import models
 
-from rest_framework import validators
+from rest_framework.validators import UniqueTogetherValidator
 
-from .enums import UserRoles
-from .models import User
+from users.enums import UserRoles
+from users.models import User
 
 
 class User(AbstractUser):
@@ -15,15 +15,15 @@ class User(AbstractUser):
         unique=True,
         db_index=True,
         validators=[
-            validators.RegexValidator(
+            RegexValidator(
                 regex=r'^[\w.@+-]+$',
                 message='Имя пользователя содержит недопустимый символ!'
             ),
-            validators.RegexValidator(
+            RegexValidator(
                 regex=r'me',
                 message='Использовать имя "me" запрещено!'
             ),
-            validators.UniqueTogetherValidator(
+            UniqueTogetherValidator(
                 queryset=User.objects.all(),
                 fields=('username', 'email'),
                 message='Имя пользователя и Email должны отличаться!'

@@ -7,13 +7,13 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from users.models import User
-from .permissions import IsSuperUserOrAdmin
-from .serializers import (
+from api.permissions import IsSuperUserOrAdmin
+from api.serializers import (
     UserSerializer,
     UserCreateSerializer,
     UserReceiveTokenSerializer
 )
-from .utils import send_confirmation_code
+from api.utils import send_confirmation_code
 
 
 class UserViewSet(mixins.CreateModelMixin,
