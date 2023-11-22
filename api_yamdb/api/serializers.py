@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers, validators
 
-from reviews.models import Comment, Category, Genre, Review, Title,
+from reviews.models import Comment, Category, Genre, Review, Title
 from users.models import User
 
 
@@ -13,6 +13,13 @@ class UserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email')
+        validators = [
+            validators.UniqueTogetherValidator(
+                queryset=User.objects.all(),
+                fields=('username', 'email'),
+                message='Имя пользователя и email должны отличаться!'
+            )
+        ]
 
     def validate(self, data):
         if data.get('username') == 'me':

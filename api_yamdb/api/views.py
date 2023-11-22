@@ -8,13 +8,15 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Title, Genre, Category, Review, Title
 from users.models import User
-from api.permissions import IsSuperUserOrAdmin
+from api.permissions import (AnonReadOnly,
+                             IsSuperUserOrAdmin,
+                             IsSuperUserOrAdminOrModeratorOrAuthor)
 from api.serializers import (TitleChangeSerializer,
                              TitleReadSerializer,
                              GenreSerializer,
                              CategorySerializer,
                              CommentSerializer,
-                             ReviewSerializer
+                             ReviewSerializer,
                              UserSerializer,
                              UserCreateSerializer,
                              UserReceiveTokenSerializer)
@@ -109,10 +111,9 @@ class UserReceiveTokenViewSet(mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    '''Viewset для модели Title'''
     queryset = Title.objects.all()
-    permission_classes = ()
-    filter_backends = filters.SearchFilter
+    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
+    filter_backends = (filters.SearchFilter,)
     filterset_fields = ('name', 'year', 'category', 'genre',)
     http_method_names = ['get', 'post', 'patch', 'delete',]
 
@@ -127,26 +128,25 @@ class GenreCategoryViewSet(mixins.ListModelMixin,
                            mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet,):
-    permission_classes = ()
-    filter_backends = filters.SearchFilter
+    permission_classes = (IsSuperUserOrAdmin,)
+    filter_backends = (filters.SearchFilter,)
     filterset_fields = ('name',)
 
 
 class GenreViewSet(GenreCategoryViewSet):
-    '''Vieset для модели Genre'''
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class CategoryViewSet(GenreCategoryViewSet):
-    '''Viewset для модели Category'''
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = ()
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsSuperUserOrAdminOrModeratorOrAuthor,)
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -160,7 +160,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = ()
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsSuperUserOrAdminOrModeratorOrAuthor,)
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))

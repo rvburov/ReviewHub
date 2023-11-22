@@ -2,10 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 
-from rest_framework.validators import UniqueTogetherValidator
-
 from users.enums import UserRoles
-from users.models import User
 
 
 class User(AbstractUser):
@@ -22,11 +19,6 @@ class User(AbstractUser):
             RegexValidator(
                 regex=r'me',
                 message='Использовать имя "me" запрещено!'
-            ),
-            UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=('username', 'email'),
-                message='Имя пользователя и Email должны отличаться!'
             )
         ]
     )
@@ -60,6 +52,12 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('id',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_name_email'
+            )
+        ]
 
     def __str__(self):
         return self.username[:50]
