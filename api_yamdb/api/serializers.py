@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import serializers, validators
 
-from reviews.models import Comment, Category, Genre, Review, Title
+from reviews.models import Comment, Category, Genre, Review, Title, TitleGenre
 from users.models import User
 
 
@@ -91,26 +91,27 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleChangeSerializer(serializers.ModelSerializer):
 
-    genre = serializers.SlugRelatedField(slug_field='name',
-                                         queryset=Genre.objects.all(),
-                                         many=True)
-    category = serializers.SlugRelatedField(slug_field='name',
+    genre = serializers.SlugRelatedField(slug_field='slug',
+                                         queryset=Genre.objects.all(),)
+    category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category', )
         model = Title
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=Genre.objects.all(),
-                fields=('title', 'genre'),
-                message='Этот жанр уже добавлен')
-        ]
+
 
     def validate_year(self, value):
         if value < dt.date.today().year:
             return value
         raise serializers.ValidationError('Гостей из будущего не ждали')
+    
+    def create(self, validated_data):
+        genre = validated_data.pop('genre')
+        title = Title.objects.create(**validated_data)
+        genre_obj = get_object_or_404(Genre, genre)
+        TitleGenre.objects.create(genre=genre_obj, title=title)
+        return title
 
 
 class CommentSerializer(serializers.ModelSerializer):

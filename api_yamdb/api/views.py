@@ -1,7 +1,7 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 
-from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework import filters, mixins, permissions, status, viewsets, pagination
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
@@ -111,11 +111,12 @@ class UserReceiveTokenViewSet(mixins.CreateModelMixin,
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
-    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
+    queryset = Title.objects.all().order_by('pk')
+    permission_classes = ()
     filter_backends = (filters.SearchFilter,)
     filterset_fields = ('name', 'year', 'category', 'genre',)
     http_method_names = ['get', 'post', 'patch', 'delete',]
+    pagination_class = pagination.PageNumberPagination
 
     def get_serializer_class(self):
         if self.action == 'list' or self.action == 'retrieve':
@@ -128,18 +129,20 @@ class GenreCategoryViewSet(mixins.ListModelMixin,
                            mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet,):
-    permission_classes = (IsSuperUserOrAdmin,)
+    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
     filter_backends = (filters.SearchFilter,)
-    filterset_fields = ('name',)
+    filterset_fields = ('name', 'slug')
+    search_fields = ('name', 'slug',)
+    pagination_class = pagination.PageNumberPagination
 
 
 class GenreViewSet(GenreCategoryViewSet):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('pk')
     serializer_class = GenreSerializer
 
 
 class CategoryViewSet(GenreCategoryViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('pk')
     serializer_class = CategorySerializer
 
 
