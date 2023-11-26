@@ -8,11 +8,18 @@ from reviews.models import Comment, Category, Genre, Review, Title
 from users.models import User
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+\Z',
+        max_length=150,
+        required=True
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
 
     class Meta:
-        model = User
-        fields = ('username', 'email')
         validators = [
             validators.UniqueTogetherValidator(
                 queryset=User.objects.all(),
@@ -39,12 +46,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 class UserReceiveTokenSerializer(serializers.Serializer):
     username = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
+        regex=r'^[\w.@+-]+\Z',
         max_length=150,
         required=True
     )
     confirmation_code = serializers.CharField(
-        max_length=150,
+        max_length=254,
         required=True
     )
 
