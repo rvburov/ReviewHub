@@ -1,4 +1,5 @@
 import datetime as dt
+from rest_framework.validators import UniqueValidator
 
 from django.shortcuts import get_object_or_404
 
@@ -38,31 +39,36 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserReceiveTokenSerializer(serializers.Serializer):
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
+    username = serializers.CharField(
+        required=True,
         max_length=150,
-        required=True
     )
     confirmation_code = serializers.CharField(
         max_length=150,
         required=True
     )
 
-
 class UserSerializer(serializers.ModelSerializer):
-
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]',
+        required=True,
+        max_length=150,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],
+    )
+    email = serializers.EmailField(
+        required=True,
+        max_length=254,
+        validators=[
+            UniqueValidator(queryset=User.objects.all())
+        ],
+    )
     class Meta:
         model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-    def validate_username(self, username):
-        if username == 'me':
-            raise serializers.ValidationError(
-                'Использовать имя "me" запрещено!'
-            )
-        return username
 
 
 class GenreSerializer(serializers.ModelSerializer):

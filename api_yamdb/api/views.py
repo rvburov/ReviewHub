@@ -32,13 +32,12 @@ from api.utils import send_confirmation_code
 class UserViewSet(mixins.CreateModelMixin,
                   mixins.ListModelMixin,
                   viewsets.GenericViewSet):
-    http_method_names = ['get', 'post', 'head', 'delete', 'patch']
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsSuperUserOrAdmin,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    pagination_class = None
+    pagination_class = pagination.PageNumberPagination
 
     @action(
         detail=False,
