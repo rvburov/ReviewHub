@@ -91,27 +91,16 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleChangeSerializer(serializers.ModelSerializer):
 
-    genre = serializers.SlugRelatedField(slug_field='slug',
-                                         queryset=Genre.objects.all(),)
-    category = serializers.SlugRelatedField(slug_field='slug',
-                                            queryset=Category.objects.all())
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug')
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug', many=True)
 
     class Meta:
         fields = ('id', 'name', 'year', 'description', 'genre', 'category', )
         model = Title
-
-
-    def validate_year(self, value):
-        if value < dt.date.today().year:
-            return value
-        raise serializers.ValidationError('Гостей из будущего не ждали')
-    
-    def create(self, validated_data):
-        genre = validated_data.pop('genre')
-        title = Title.objects.create(**validated_data)
-        genre_obj = get_object_or_404(Genre, genre)
-        TitleGenre.objects.create(genre=genre_obj, title=title)
-        return title
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -121,7 +110,7 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('author', 'review', 'text', 'pub_date')
+        fields = ('id', 'author', 'review', 'text', 'pub_date')
         model = Comment
         read_only_fields = ('review',)
 
@@ -134,7 +123,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('author', 'title', 'score', 'text', 'pub_date')
+        fields = ('id', 'author', 'title', 'score', 'text', 'pub_date')
         model = Review
         read_only_fields = ('title',)
 

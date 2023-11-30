@@ -1,10 +1,16 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 
-from rest_framework import filters, mixins, permissions, status, viewsets, pagination
+from rest_framework import (filters,
+                            mixins,
+                            permissions,
+                            status,
+                            viewsets,
+                            pagination)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Title, Genre, Category, Review, Title
 from users.models import User
@@ -112,9 +118,10 @@ class UserReceiveTokenViewSet(mixins.CreateModelMixin,
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().order_by('pk')
-    permission_classes = ()
-    filter_backends = (filters.SearchFilter,)
-    filterset_fields = ('name', 'year', 'category', 'genre',)
+    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend)
+    filterset_fields = ('name', 'year', 'category__slug', 'genre__slug')
+    search_fields = ['name', 'year', 'category', 'genre__slug',]
     http_method_names = ['get', 'post', 'patch', 'delete',]
     pagination_class = pagination.PageNumberPagination
 
@@ -133,10 +140,11 @@ class GenreCategoryViewSet(mixins.ListModelMixin,
     filter_backends = (filters.SearchFilter,)
     filterset_fields = ('name', 'slug')
     search_fields = ('name', 'slug',)
+    lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
 
 
-class GenreViewSet(GenreCategoryViewSet):
+class GenreViewSet(GenreCategoryViewSet,):
     queryset = Genre.objects.all().order_by('pk')
     serializer_class = GenreSerializer
 
@@ -150,6 +158,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsSuperUserOrAdminOrModeratorOrAuthor,)
+    pagination_class = pagination.PageNumberPagination
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
@@ -165,6 +174,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
                           IsSuperUserOrAdminOrModeratorOrAuthor,)
+    pagination_class = pagination.PageNumberPagination
 
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
