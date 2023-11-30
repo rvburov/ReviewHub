@@ -19,29 +19,23 @@ class UserCreateSerializer(serializers.Serializer):
         required=True
     )
 
-    class Meta:
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=('username', 'email'),
-                message='Имя пользователя и email должны отличаться!'
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                f'Использовать имя - {value} - запрещено!'
             )
-        ]
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                f'Пользователь с таким username — {value} — уже существует!'
+            )
+        return value
 
-    def validate(self, data):
-        if data.get('username') == 'me':
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                'Использовать имя "me" запрещено!'
+                f'Пользователь с таким email - {value} - уже существует!'
             )
-        if User.objects.filter(username=data.get('username')):
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует!'
-            )
-        if User.objects.filter(email=data.get('email')):
-            raise serializers.ValidationError(
-                'Пользователь с таким email уже существует!'
-            )
-        return data
+        return value
 
 
 class UserReceiveTokenSerializer(serializers.Serializer):

@@ -8,7 +8,8 @@ from api.views import (TitleViewSet,
                        ReviewViewSet,
                        UserViewSet,
                        UserCreateViewSet,
-                       UserReceiveTokenViewSet)
+                       UserReceiveTokenViewSet
+                       )
 
 router_v1 = DefaultRouter()
 
