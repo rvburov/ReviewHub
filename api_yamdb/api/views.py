@@ -92,14 +92,23 @@ class UserCreateViewSet(mixins.CreateModelMixin,
 
     def create(self, request):
         serializer = UserCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user, _ = User.objects.get_or_create(**serializer.validated_data)
-        confirmation_code = default_token_generator.make_token(user)
-        send_confirmation_code(
-            email=user.email,
-            confirmation_code=confirmation_code
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        username = request.data.get('username')
+        email = request.data.get('email')
+        if serializer.is_valid() or User.objects.filter(
+            username=username,
+            email=email
+        ).exists():
+            user, _ = User.objects.get_or_create(
+                username=username,
+                email=email
+            )
+            confirmation_code = default_token_generator.make_token(user)
+            send_confirmation_code(
+                email=user.email,
+                confirmation_code=confirmation_code
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserReceiveTokenViewSet(mixins.CreateModelMixin,

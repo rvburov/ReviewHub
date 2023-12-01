@@ -13,12 +13,8 @@ class User(AbstractUser):
         db_index=True,
         validators=[
             RegexValidator(
-                regex=r'^[\w.@+-]+$',
+                regex=r'^[\w.@+-]+\Z',
                 message='Имя пользователя содержит недопустимый символ!'
-            ),
-            RegexValidator(
-                regex=r'me',
-                message='Использовать имя "me" запрещено!'
             )
         ]
     )
@@ -55,7 +51,7 @@ class User(AbstractUser):
         constraints = [
             models.UniqueConstraint(
                 fields=['username', 'email'],
-                name='unique_name_email'
+                name='unique_username_email'
             )
         ]
 

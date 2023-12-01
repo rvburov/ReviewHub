@@ -9,33 +9,34 @@ from reviews.models import Comment, Category, Genre, Review, Title, TitleGenre
 from users.models import User
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+\Z',
+        max_length=150,
+        required=True
+    )
+    email = serializers.EmailField(
+        max_length=254,
+        required=True
+    )
 
-    class Meta:
-        model = User
-        fields = ('username', 'email')
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=User.objects.all(),
-                fields=('username', 'email'),
-                message='Имя пользователя и email должны отличаться!'
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise serializers.ValidationError(
+                f'Использовать имя - {value} - запрещено!'
             )
-        ]
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                f'Пользователь с таким username — {value} — уже существует!'
+            )
+        return value
 
-    def validate(self, data):
-        if data.get('username') == 'me':
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
-                'Использовать имя "me" запрещено!'
+                f'Пользователь с таким email - {value} - уже существует!'
             )
-        if User.objects.filter(username=data.get('username')):
-            raise serializers.ValidationError(
-                'Пользователь с таким именем уже существует!'
-            )
-        if User.objects.filter(email=data.get('email')):
-            raise serializers.ValidationError(
-                'Пользователь с таким email уже существует!'
-            )
-        return data
+        return value
 
 
 class UserReceiveTokenSerializer(serializers.Serializer):
@@ -44,7 +45,7 @@ class UserReceiveTokenSerializer(serializers.Serializer):
         max_length=150,
     )
     confirmation_code = serializers.CharField(
-        max_length=150,
+        max_length=254,
         required=True
     )
 
