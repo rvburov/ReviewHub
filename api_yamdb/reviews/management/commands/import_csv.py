@@ -1,7 +1,9 @@
-from typing import Any
 import pandas
+from typing import Any
+
 from django.core.management.base import BaseCommand, CommandParser
-from reviews.models import Title, TitleGenre
+
+from reviews.models import TitleGenre
 
 
 class Command(BaseCommand):
@@ -9,7 +11,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('csv_file', type=str)
-    
+
     def handle(self, *args: Any, **options: Any):
         csv_file = options['csv_file']
         df = pandas.read_csv(csv_file)
@@ -20,5 +22,3 @@ class Command(BaseCommand):
                 title_id=row['title_id'],
                 genre_id=row['genre_id']
             )
-        
-        
