@@ -6,10 +6,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 
 
-from rest_framework import filters, mixins, permissions, status, viewsets, pagination
+from rest_framework import (filters,
+                            mixins,
+                            permissions,
+                            status,
+                            viewsets,
+                            pagination)
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from django_filters.rest_framework import DjangoFilterBackend
 
 from reviews.models import Title, Genre, Category, Review, Title
 from users.models import User
@@ -144,7 +150,7 @@ class GenreCategoryViewSet(mixins.ListModelMixin,
     pagination_class = pagination.PageNumberPagination
 
 
-class GenreViewSet(GenreCategoryViewSet):
+class GenreViewSet(GenreCategoryViewSet,):
     queryset = Genre.objects.all().order_by('pk')
     serializer_class = GenreSerializer
 

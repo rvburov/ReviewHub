@@ -99,10 +99,12 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
 class TitleChangeSerializer(serializers.ModelSerializer):
 
-    genre = serializers.SlugRelatedField(slug_field='slug',
-                                         queryset=Genre.objects.all(), many=True,)
-    category = serializers.SlugRelatedField(slug_field='slug',
-                                            queryset=Category.objects.all())
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug')
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug', many=True)
 
     class Meta:
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category', )
