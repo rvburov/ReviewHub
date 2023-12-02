@@ -148,11 +148,6 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username',
     )
 
-    def validate_score(self, value):
-        if 0 > value > 10:
-            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
-        return value
-
     def validate(self, data):
         title_id = self.context['view'].kwargs['title_id']
         request = self.context['request']
