@@ -19,8 +19,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from reviews.models import Title, Genre, Category, Review, Title
 from users.models import User
 from api.permissions import (AnonReadOnly,
-                             IsSuperUserOrAdmin,
-                             IsSuperUserOrAdminOrModeratorOrAuthor)
+                             IsSuperUserOrAdminAndIsAuth,
+                             IsSuperUserOrAdminOrModerOrAuthorAndIsAuth)
 from api.serializers import (TitleChangeSerializer,
                              TitleReadSerializer,
                              GenreSerializer,
@@ -39,7 +39,7 @@ class UserViewSet(mixins.CreateModelMixin,
                   viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsSuperUserOrAdmin,)
+    permission_classes = (IsSuperUserOrAdminAndIsAuth,)
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     pagination_class = pagination.PageNumberPagination
@@ -133,7 +133,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(
         Avg('reviews__score')
     ).order_by('name')
-    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
+    permission_classes = (AnonReadOnly | IsSuperUserOrAdminAndIsAuth,)
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
     http_method_names = ['get', 'post', 'head', 'delete', 'patch']
@@ -150,7 +150,7 @@ class GenreCategoryViewSet(mixins.ListModelMixin,
                            mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet,):
-    permission_classes = (AnonReadOnly | IsSuperUserOrAdmin,)
+    permission_classes = (AnonReadOnly | IsSuperUserOrAdminAndIsAuth,)
     filter_backends = (filters.SearchFilter,)
     filterset_class = TitleFilter
     search_fields = ('name', 'slug',)
@@ -171,7 +171,7 @@ class CategoryViewSet(GenreCategoryViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsSuperUserOrAdminOrModeratorOrAuthor,)
+                          IsSuperUserOrAdminOrModerOrAuthorAndIsAuth,)
     pagination_class = pagination.PageNumberPagination
     http_method_names = ['get', 'post', 'head', 'delete', 'patch']
 
@@ -188,7 +188,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsSuperUserOrAdminOrModeratorOrAuthor,)
+                          IsSuperUserOrAdminOrModerOrAuthorAndIsAuth,)
     pagination_class = pagination.PageNumberPagination
     http_method_names = ['get', 'post', 'head', 'delete', 'patch']
 

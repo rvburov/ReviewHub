@@ -5,6 +5,10 @@ from django.shortcuts import get_object_or_404
 from reviews.models import Comment, Category, Genre, Review, Title
 from users.models import User
 
+FORBIDDEN_USERNAMES = [
+    'me',
+]
+
 
 class UserCreateSerializer(serializers.Serializer):
     username = serializers.RegexField(
@@ -18,7 +22,7 @@ class UserCreateSerializer(serializers.Serializer):
     )
 
     def validate_username(self, value):
-        if value.lower() == 'me':
+        if value.lower() in FORBIDDEN_USERNAMES:
             raise serializers.ValidationError(
                 f'Использовать имя - {value} - запрещено!'
             )
