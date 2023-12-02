@@ -3,9 +3,8 @@ from pathlib import Path
 from datetime import timedelta
 
 from dotenv import load_dotenv
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+
+load_dotenv()
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
