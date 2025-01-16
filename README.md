@@ -40,6 +40,18 @@
    pip install -r requirements.txt
    ```
 
+4. **Генерация SECRET_KEY для `.env`:**
+
+- Выполните в терминале:
+   ```bash
+   python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+   ```
+- Скопируйте ключ и добавьте в `.env`:
+   ```
+   SECRET_KEY=ваш_сгенерированный_ключ
+   ```
+- Убедитесь, что `.env` добавлен в `.gitignore`.
+
 4. **Выполнить миграции:**
    ```bash
    python3 manage.py migrate
